@@ -211,7 +211,7 @@ const FanFanSystem = () => {
                 ¿estuviste en la party?
               </h2>
 
-              <div className="flex gap-2 mb-3">
+              <div className="mb-3">
                 <input
                   type="text"
                   placeholder="tu código"
@@ -221,11 +221,11 @@ const FanFanSystem = () => {
                     setErrorCodigo(false);
                   }}
                   onKeyDown={(e) => e.key === 'Enter' && verificarCodigo()}
-                  className="flex-1 px-4 py-4 bg-white/10 border-2 border-pink-300 rounded-full text-center text-lg font-bold tracking-widest placeholder:text-pink-300 focus:border-lime-400 outline-none"
+                  className="w-full px-4 py-4 bg-white/10 border-2 border-pink-300 rounded-full text-center text-lg font-bold tracking-widest placeholder:text-pink-300 focus:border-lime-400 outline-none mb-2"
                 />
                 <button
                   onClick={verificarCodigo}
-                  className="px-5 py-4 bg-lime-400 text-pink-600 font-black rounded-full"
+                  className="w-full px-5 py-4 bg-lime-400 text-pink-600 font-black rounded-full"
                 >
                   GO
                 </button>
