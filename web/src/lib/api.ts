@@ -19,38 +19,50 @@ export async function api<T>(path: string, opts: RequestInit = {}): Promise<T> {
 
     console.log('[api] ->', opts.method || 'GET', url);
 
-    const res = await fetch(url, { ...opts, headers, cache: 'no-store' });
-
-    let payload: any = null;
-    const text = await res.text();
     try {
-        payload = text ? JSON.parse(text) : null;
-    } catch {
-        payload = text || null;
-    }
+        const res = await fetch(url, { ...opts, headers, cache: 'no-store' });
 
-    if (!res.ok) {
-        let msg = `${res.status} ${res.statusText}`;
-        if (payload) {
-            if (typeof payload.error === 'string') {
-                msg = payload.error;
-            } else if (payload.error?.message) {
-                msg = payload.error.message;
-            } else if (payload.message) {
-                msg = payload.message;
+        let payload: any = null;
+        const text = await res.text();
+        try {
+            payload = text ? JSON.parse(text) : null;
+        } catch {
+            payload = text || null;
+        }
+
+        if (!res.ok) {
+            let msg = `${res.status} ${res.statusText}`;
+            if (payload) {
+                if (typeof payload.error === 'string') {
+                    msg = payload.error;
+                } else if (payload.error?.message) {
+                    msg = payload.error.message;
+                } else if (payload.message) {
+                    msg = payload.message;
+                }
             }
-        }
-//TOKEN MALO O EXPIRADO
-        if (res.status === 401 && typeof window !== 'undefined') {
-            localStorage.removeItem('token');
-            window.location.href = '/auth';
+            //TOKEN MALO O EXPIRADO
+            if (res.status === 401 && typeof window !== 'undefined') {
+                localStorage.removeItem('token');
+                window.location.href = '/auth';
+            }
+
+            const err = new Error(msg) as any;
+            err.status = res.status;
+            err.payload = payload;
+            throw err;
         }
 
-        const err = new Error(msg) as any;
-        err.status = res.status;
-        err.payload = payload;
+        return payload as T;
+    } catch (error: any) {
+        // Manejo seguro de errores para evitar problemas con filter
+        if (error instanceof Error) {
+            throw error;
+        }
+        // Si el error no es una instancia de Error, crear uno nuevo
+        const err = new Error(error?.message || 'Error desconocido') as any;
+        if (error?.status) err.status = error.status;
+        if (error?.payload) err.payload = error.payload;
         throw err;
     }
-
-    return payload as T;
 }
