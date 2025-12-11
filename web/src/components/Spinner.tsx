@@ -1,0 +1,1 @@
+export default function Spinner(){return <div className='py-12 text-center opacity-70'>Loading…</div>;}
