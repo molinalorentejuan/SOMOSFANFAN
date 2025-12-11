@@ -105,7 +105,7 @@ export default function LeadsAdminPage() {
                     </div>
                 ) : (
                     <div className="space-y-4">
-                        {leads.map((lead) => (
+                        {Array.isArray(leads) && leads.map((lead) => (
                             <div
                                 key={lead.id}
                                 className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"

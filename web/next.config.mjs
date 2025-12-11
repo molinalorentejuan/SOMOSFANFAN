@@ -21,12 +21,6 @@ const nextConfig = {
       },
     ],
   },
-  // Silenciar warning de múltiples lockfiles
-  experimental: {
-    turbo: {
-      root: './web',
-    },
-  },
 };
 
 export default nextConfig;
