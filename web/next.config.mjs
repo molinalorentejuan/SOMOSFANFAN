@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Configuración para Railway - standalone output
+  output: 'standalone',
   images: {
     remotePatterns: [
       {

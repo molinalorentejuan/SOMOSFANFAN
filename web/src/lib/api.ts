@@ -1,6 +1,6 @@
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
-function ensureAbsolute(path: string) {
+function ensureAbsolute(path: string): string {
     return path.startsWith('/') ? path : '/' + path;
 }
 

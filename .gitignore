@@ -106,5 +106,8 @@ out/
 *.key
 *.cert
 
+# Lockfiles de la raíz (solo mantener los de subdirectorios)
+/package-lock.json
+
 
 
