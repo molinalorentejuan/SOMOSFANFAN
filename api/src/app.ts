@@ -1,8 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import { authRouter } from './routes/auth';
-import { restaurantRouter } from './routes/restaurants';
-import { commentRouter } from './routes/comments';
+import { fanfanRouter } from './routes/fanfan';
 import {errorHandler} from "./middleware/errorHandler";
 
 export function createApp() {
@@ -13,8 +12,7 @@ export function createApp() {
     app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
     app.use(authRouter);
-    app.use(restaurantRouter);
-    app.use(commentRouter);
+    app.use(fanfanRouter);
 
     app.use(errorHandler);
 

@@ -1,16 +1,25 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import type { Request, Response, NextFunction } from 'express';
-import { db, User, nextId } from './data';
 import { ApiError } from './middleware/errorHandler';
 
-const JWT_SECRET: string = process.env.JWT_SECRET ?? 'secretito';
-if (!JWT_SECRET) {
-    throw new Error("JWT_SECRET se configura en .env !!)");
+const JWT_SECRET: string = process.env.JWT_SECRET || 'secretito-cambiar-en-produccion';
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'admin123';
+
+// Hash de la contraseña admin (se genera al iniciar si no existe)
+let adminPasswordHash: string | null = null;
+
+// Inicializar hash de contraseña admin
+export async function initAdminPassword() {
+    if (!adminPasswordHash) {
+        adminPasswordHash = await bcrypt.hash(ADMIN_PASSWORD, 10);
+        console.log(`✅ Admin configurado: ${ADMIN_USERNAME}`);
+    }
 }
 
 export function signToken(payload: object) {
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: '2h' });
+    return jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
 }
 
 export function authMiddleware(req: Request & { user?: any }, res: Response, next: NextFunction) {
@@ -26,23 +35,16 @@ export function authMiddleware(req: Request & { user?: any }, res: Response, nex
     }
 }
 
-export async function createUser(username: string, password: string, email: string): Promise<User> {
-    if (db.users.some(u => u.username === username)) {
-        throw new ApiError(400, 'Usuario ya existe');
+export async function verifyAdmin(username: string, password: string): Promise<boolean> {
+    await initAdminPassword();
+    
+    if (username !== ADMIN_USERNAME) {
+        return false;
     }
-    if (db.users.some(u => u.email === email)) {
-        throw new ApiError(400, 'Email ya existe');
+    
+    if (!adminPasswordHash) {
+        return false;
     }
-    const id = nextId('user');
-    const passwordHash = await bcrypt.hash(password, 10);
-    const user: User = { id, username, passwordHash, email};
-    db.users.push(user);
-    return user;
-}
-
-export async function verifyUser(email: string, password: string): Promise<User | null> {
-    const u = db.users.find(x => x.email === email);
-    if (!u) return null;
-    const ok = await bcrypt.compare(password, u.passwordHash);
-    return ok ? u : null;
+    
+    return await bcrypt.compare(password, adminPasswordHash);
 }

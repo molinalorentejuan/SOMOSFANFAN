@@ -79,24 +79,12 @@ const FanFanSystem = () => {
       fecha: new Date().toISOString(),
     };
     try {
-      // Intentar guardar en el backend usando la API existente
-      try {
-        await api('/fanfan/leads', {
-          method: 'POST',
-          body: JSON.stringify(data),
-        });
-        console.log('Lead guardado en backend:', data);
-      } catch (apiError) {
-        // Si falla el backend, guardar en localStorage como fallback
-        console.warn('Backend no disponible, guardando en localStorage:', apiError);
-        if (typeof window !== 'undefined') {
-          const leadsStr = localStorage.getItem('fanfan-leads');
-          const leads = leadsStr ? JSON.parse(leadsStr) : [];
-          leads.push(data);
-          localStorage.setItem('fanfan-leads', JSON.stringify(leads));
-          console.log('Lead guardado en localStorage:', data);
-        }
-      }
+      // Guardar en el backend
+      await api('/fanfan/leads', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+      console.log('Lead guardado:', data);
     } catch (e) {
       console.error('Error guardando lead:', e);
     }
