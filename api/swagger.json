@@ -1,17 +1,17 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Restaurants API",
+    "title": "FanFan API",
     "version": "1.0.0",
-    "description": "API de restaurantes y comentarios con auth JWT"
+    "description": "API para gestión de leads de FanFan con autenticación admin"
   },
   "servers": [
     { "url": "http://localhost:4000", "description": "Local" }
   ],
   "paths": {
-    "/auth/register": {
+    "/auth/login": {
       "post": {
-        "summary": "Registro de usuario",
+        "summary": "Login admin",
         "requestBody": {
           "required": true,
           "content": {
@@ -19,155 +19,121 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "username": { "type": "string" },
                   "email": { "type": "string", "format": "email" },
                   "password": { "type": "string" }
                 },
-                "required": ["username", "email", "password"]
+                "required": ["email", "password"]
               }
             }
           }
         },
         "responses": {
-          "201": { "description": "Usuario creado" },
-          "400": { "description": "Error de validación" }
+          "200": {
+            "description": "Login exitoso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "token": { "type": "string" },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "username": { "type": "string" },
+                        "email": { "type": "string" },
+                        "role": { "type": "string" }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Credenciales inválidas" }
         }
       }
     },
-    "/auth/login": {
+    "/fanfan/leads": {
       "post": {
-        "summary": "Login de usuario",
+        "summary": "Crear un nuevo lead (público)",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "email": { "type": "string" },
-                  "password": { "type": "string" }
+                "$ref": "#/components/schemas/Lead"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Lead creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "message": { "type": "string" },
+                    "lead": { "$ref": "#/components/schemas/Lead" }
+                  }
                 }
               }
             }
           }
-        },
-        "responses": {
-          "200": { "description": "Login correcto con token" },
-          "401": { "description": "Credenciales incorrectas" }
-        }
-      }
-    },
-    "/restaurants": {
-      "get": {
-        "summary": "Lista todos los restaurantes",
-        "responses": {
-          "200": { "description": "Array de restaurantes" }
         }
       },
-      "post": {
-        "summary": "Crea restaurante",
+      "get": {
+        "summary": "Obtener todos los leads (requiere autenticación admin)",
         "security": [{ "bearerAuth": [] }],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Restaurant"
+        "responses": {
+          "200": {
+            "description": "Lista de leads",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "leads": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Lead" }
+                    },
+                    "total": { "type": "number" }
+                  }
+                }
               }
             }
-          }
-        },
-        "responses": {
-          "201": { "description": "Restaurante creado" },
+          },
           "401": { "description": "No autenticado" }
         }
-      }
-    },
-    "/restaurants/{id}": {
-      "get": {
-        "summary": "Obtiene un restaurante",
-        "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
-        ],
-        "responses": {
-          "200": { "description": "Restaurante" },
-          "404": { "description": "No encontrado" }
-        }
-      },
-      "put": {
-        "summary": "Edita un restaurante",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
-        ],
-        "requestBody": { "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Restaurant" } } } },
-        "responses": { "200": { "description": "Restaurante actualizado" }, "403": { "description": "No es propietario" }, "404": { "description": "No encontrado" } }
-      },
-      "delete": {
-        "summary": "Elimina un restaurante",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
-        ],
-        "responses": { "200": { "description": "Eliminado" }, "403": { "description": "No es propietario" }, "404": { "description": "No encontrado" } }
-      }
-    },
-    "/restaurants/{id}/comments": {
-      "get": {
-        "summary": "Lista comentarios de un restaurante",
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "200": { "description": "Lista de comentarios" } }
-      },
-      "post": {
-        "summary": "Crea comentario en un restaurante",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "requestBody": { "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Comment" } } } },
-        "responses": { "201": { "description": "Comentario creado" }, "401": { "description": "No autenticado" } }
-      }
-    },
-    "/comments/{id}": {
-      "put": {
-        "summary": "Edita comentario",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "200": { "description": "Comentario editado" }, "403": { "description": "No es propietario" }, "404": { "description": "No encontrado" } }
-      },
-      "delete": {
-        "summary": "Elimina comentario",
-        "security": [{ "bearerAuth": [] }],
-        "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
-        "responses": { "204": { "description": "Eliminado" }, "403": { "description": "No es propietario" }, "404": { "description": "No encontrado" } }
       }
     }
   },
   "components": {
     "securitySchemes": {
-      "bearerAuth": { "type": "http", "scheme": "bearer", "bearerFormat": "JWT" }
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
     },
     "schemas": {
-      "Restaurant": {
+      "Lead": {
         "type": "object",
         "properties": {
-          "name": { "type": "string" },
-          "address": { "type": "string" },
-          "description": { "type": "string" },
-          "cuisine": { "type": "string" },
-          "phone": { "type": "string" },
-          "image": { "type": "string" },
-          "openingHours": { "type": "string" },
-          "lat": { "type": "number" },
-          "lng": { "type": "number" }
+          "id": { "type": "string" },
+          "nombre": { "type": "string" },
+          "email": { "type": "string", "format": "email" },
+          "telefono": { "type": "string" },
+          "mensaje": { "type": "string" },
+          "tipo": { "type": "string" },
+          "codigo": { "type": "string", "nullable": true },
+          "descuento": { "type": "string", "nullable": true },
+          "fecha": { "type": "string", "format": "date-time" }
         },
-        "required": ["name", "address", "description"]
-      },
-      "Comment": {
-        "type": "object",
-        "properties": {
-          "text": { "type": "string" },
-          "rating": { "type": "integer", "minimum": 0, "maximum": 5 }
-        },
-        "required": ["text"]
+        "required": ["nombre", "email", "tipo"]
       }
     }
   }

@@ -1,5 +1,5 @@
 {
-  "name": "tailorhub-restaurants-api",
+  "name": "fanfan-api",
   "version": "1.0.0",
   "scripts": {
     "dev": "tsx watch src/index.ts",

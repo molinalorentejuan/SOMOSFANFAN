@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/lib/store';
 import clsx from 'clsx';
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 
 export function AuthStatus() {
     const { user, logout } = useAuth();
@@ -21,7 +21,7 @@ export function AuthStatus() {
     }, []);
 
     if (!user) {
-        return <Link className="btn" href="/auth">Login</Link>;
+        return <Link className="btn" href="/admin/login">Admin</Link>;
     }
 
     return (
@@ -46,25 +46,13 @@ export function AuthStatus() {
             >
                 <div className="bg-brand text-white p-2">
                     <Link
-                        href="/account"
+                        href="/admin/leads"
                         className="block w-full text-left px-3 py-2 rounded-xl hover:bg-white/10"
                         role="menuitem"
                         onClick={() => setOpen(false)}
                     >
-                        Mi cuenta
+                        Ver Leads
                     </Link>
-
-                    <button
-                        type="button"
-                        className="block w-full text-left px-3 py-2 rounded-xl hover:bg-white/10"
-                        role="menuitem"
-                        onClick={() => {
-                            setOpen(false);
-                            window.location.assign('/restaurants/new'); // fuerza recarga -> estado limpio
-                        }}
-                    >
-                        Añadir restaurante
-                    </button>
 
                     <button
                         className="mt-2 w-full bg-white text-black px-3 py-2 rounded-xl"

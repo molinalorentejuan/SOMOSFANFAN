@@ -3,44 +3,27 @@ import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/lib/store";
-//import logo from "@/../public/MEDIA/logoBlanco.png";
 
 export default function AuthPage() {
-    const [mode, setMode] = useState<"login" | "register">("login");
-    const [step, setStep] = useState<1 | 2>(1);
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
     const router = useRouter();
-    const { login, register } = useAuth();
+    const { login } = useAuth();
 
     async function submit(e: React.FormEvent) {
         e.preventDefault();
         try {
-            if (mode === "login") {
-                if (!email || !password) {
-                    alert("Introduce email y contraseña.");
-                    return;
-                }
-                await login(email, password);
-            } else {
-                if (step === 1) {
-                    setStep(2);
-                    return;
-                }
-                if (!username || !password) {
-                    alert("Introduce usuario y contraseña.");
-                    return;
-                }
-                await register(username, password, email);
+            if (!email || !password) {
+                alert("Introduce email y contraseña.");
+                return;
             }
-            router.replace("/");
+            await login(email, password);
+            router.replace("/admin/leads");
         } catch (e: any) {
             alert(e.message || "Error de autenticación");
         }
     }
 
-//<Image className="w-12 h-12" /> src={logo} alt="logo"
     return (
         <div className="grid md:grid-cols-2 gap-8 items-end">
             {/* Columna azul*/}
@@ -49,131 +32,68 @@ export default function AuthPage() {
                 <div className="text-3xl font-bold flex items-center mb-4">
                     <span className="tracking-tight">FANFAN</span>
                 </div>
-
-                {/* Formulario*/}
+                <h1 className="text-4xl font-black mb-2">Admin Login</h1>
+                <p className="text-blue-100 mb-8">
+                    Acceso administrativo al sistema
+                </p>
                 <div className="mt-auto">
-                    <form onSubmit={submit} className="space-y-3 w-full">
-                        {mode === "login" ? (
-                            <>
-                                <label className="block text-sm">Email</label>
-                                <input
-                                    maxLength={30}
-                                    type="email"
-                                    className="w-full rounded-[20px] bg-white text-black px-4 py-3 outline-none focus:ring-2 focus:ring-white/70"
-                                    placeholder="Escribe tu email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                />
-                                <label className="block text-sm">Contraseña</label>
-                                <input
-                                    maxLength={30}
-                                    type="password"
-                                    className="w-full rounded-[20px] bg-white text-black px-4 py-3 outline-none focus:ring-2 focus:ring-white/70"
-                                    placeholder="Escribe tu contraseña"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
-                            </>
-                        ) : step === 1 ? (
-                            <>
-                                <button
-                                    type="button"
-                                    className="rounded-2xl bg-white/20 text-white px-3 py-1 hover:bg-white/25"
-                                    onClick={() => {
-                                        setMode("login");
-                                        setStep(1);
-                                    }}
-                                >
-                                    ←
-                                </button>
-                                <label className="block text-sm">Email</label>
-                                <input
-                                    maxLength={30}
-                                    type="email"
-                                    className="w-full rounded-[20px] bg-white text-black px-4 py-3 outline-none focus:ring-2 focus:ring-white/70"
-                                    placeholder="Añade tu email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    required
-                                />
-                                <label className="block text-sm">Nombre de usuario</label>
-                                <input
-                                    maxLength={30}
-                                    className="w-full rounded-[20px] bg-white text-black px-4 py-3 outline-none focus:ring-2 focus:ring-white/70"
-                                    placeholder="Añade tu nombre"
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    required
-                                />
-                            </>
-                        ) : (
-                            <>
-                                <button
-                                    type="button"
-                                    className="rounded-2xl bg-white/20 text-white px-3 py-1 hover:bg-white/25"
-                                    onClick={() => setStep(1)}
-                                >
-                                    ←
-                                </button>
-                                <label className="block text-sm">Crea una contraseña nueva</label>
-                                <input
-                                    maxLength={30}
-                                    type="password"
-                                    className="w-full rounded-[20px] bg-white text-black px-4 py-3 outline-none focus:ring-2 focus:ring-white/70"
-                                    placeholder="Añade una contraseña"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    required
-                                />
-                            </>
-                        )}
-
-                        <button className="bg-white text-black rounded-2xl px-4 py-2 shadow-sm hover:bg-white/95">
-                            {mode === "login"
-                                ? "Siguiente"
-                                : step === 1
-                                    ? "Siguiente"
-                                    : "Finalizar"}
-                        </button>
-                    </form>
-
-                    <div className="text-sm mt-4 text-white/90">
-                        {mode === "login" ? (
-                            <>
-                                ¿No tienes cuenta?{" "}
-                                <button
-                                    className="underline"
-                                    onClick={() => {
-                                        setMode("register");
-                                        setStep(1);
-                                    }}
-                                >
-                                    Regístrate
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                ¿Ya tienes cuenta?{" "}
-                                <button className="underline" onClick={() => setMode("login")}>
-                                    Inicia sesión
-                                </button>
-                            </>
-                        )}
-                    </div>
+                    <Image
+                        src="/MEDIA/login1.png"
+                        alt="FanFan"
+                        width={300}
+                        height={200}
+                        className="rounded-lg"
+                    />
                 </div>
             </div>
 
-            {/* Columna para la imagen */}
-            <div className="relative rounded-[20px] shadow-xl overflow-hidden min-h-[600px]">
-                <Image
-                    src={mode === "login" ? "/MEDIA/login1.png" : "/MEDIA/login1.png"}
-                    alt="Restaurant"
-                    fill
-                    className="object-cover"
-                    priority
-                />
+            {/* Columna blanca - Formulario */}
+            <div className="bg-white px-8 py-6 rounded-[20px] shadow-xl">
+                <form onSubmit={submit} className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Usuario
+                        </label>
+                        <input
+                            type="text"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                            placeholder="admin"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Contraseña
+                        </label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                            placeholder="••••••••"
+                        />
+                    </div>
+
+                    <button
+                        type="submit"
+                        className="w-full bg-[#1E40FF] text-white font-bold py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                        Iniciar sesión
+                    </button>
+                </form>
+
+                <div className="mt-6 text-center">
+                    <a
+                        href="/"
+                        className="text-sm text-gray-500 hover:text-gray-700"
+                    >
+                        ← Volver al inicio
+                    </a>
+                </div>
             </div>
         </div>
     );
