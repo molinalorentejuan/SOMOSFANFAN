@@ -1,12 +1,9 @@
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
-
+// Usar rutas relativas - Next.js maneja el routing
 function ensureAbsolute(path: string): string {
     return path.startsWith('/') ? path : '/' + path;
 }
 
 export async function api<T>(path: string, opts: RequestInit = {}): Promise<T> {
-    if (!API_URL) throw new Error('Falta NEXT_PUBLIC_API_URL');
-
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
 
     const headers = new Headers(opts.headers || {});
@@ -15,9 +12,13 @@ export async function api<T>(path: string, opts: RequestInit = {}): Promise<T> {
     }
     if (token) headers.set('Authorization', `Bearer ${token}`);
 
-    const url = `${API_URL}${ensureAbsolute(path)}`;
+    // Usar ruta relativa - Next.js API Routes
+    const url = ensureAbsolute(path);
 
-    console.log('[api] ->', opts.method || 'GET', url);
+    // Log solo en desarrollo
+    if (process.env.NODE_ENV === 'development') {
+        console.log('[api] ->', opts.method || 'GET', url);
+    }
 
     try {
         const res = await fetch(url, { ...opts, headers, cache: 'no-store' });

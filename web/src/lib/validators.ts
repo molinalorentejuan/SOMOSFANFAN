@@ -49,3 +49,4 @@ export const leadSchema = z.object({
         .string()
         .optional(),
 });
+

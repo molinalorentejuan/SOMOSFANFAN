@@ -37,7 +37,7 @@ export default function LeadsAdminPage() {
     async function fetchLeads() {
         try {
             setLoading(true);
-            const data = await api<{ leads: Lead[]; total: number }>('/fanfan/leads');
+            const data = await api<{ leads: Lead[]; total: number }>('/api/fanfan/leads');
             // Asegurar que leads sea un array
             setLeads(Array.isArray(data?.leads) ? data.leads : []);
         } catch (err: any) {

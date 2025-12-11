@@ -1,7 +1,5 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import type { Request, Response, NextFunction } from 'express';
-import { ApiError } from './middleware/errorHandler';
 
 const JWT_SECRET: string = process.env.JWT_SECRET || 'secretito-cambiar-en-produccion';
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
@@ -22,16 +20,11 @@ export function signToken(payload: object) {
     return jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
 }
 
-export function authMiddleware(req: Request & { user?: any }, res: Response, next: NextFunction) {
-    const auth = req.headers.authorization || '';
-    const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
-    if (!token) return next(new ApiError(401, 'Falta token'));
+export function verifyToken(token: string): any {
     try {
-        const decoded = jwt.verify(token, JWT_SECRET) as any;
-        req.user = decoded;
-        next();
+        return jwt.verify(token, JWT_SECRET);
     } catch {
-        return next(new ApiError(401, 'Token inválido o expirado'));
+        return null;
     }
 }
 
@@ -48,3 +41,7 @@ export async function verifyAdmin(username: string, password: string): Promise<b
     
     return await bcrypt.compare(password, adminPasswordHash);
 }
+
+// Inicializar al cargar el módulo
+initAdminPassword();
+

@@ -1,7 +1,7 @@
-
 import './globals.css';
 import Link from 'next/link';
 import { AuthStatus } from './parts/AuthStatus';
+import '@/lib/init-db'; // Inicializar DB al arrancar
 
 export const metadata = { title: 'FANFAN' };
 

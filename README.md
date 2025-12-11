@@ -8,6 +8,7 @@ Sistema de gestión de leads para FanFan.
 - **Panel de administración** protegido para ver todos los leads
 - **Base de datos PostgreSQL** para persistencia (con fallback a memoria en desarrollo)
 - **Autenticación JWT** para acceso admin
+- **Next.js API Routes** - Todo integrado en una sola aplicación
 
 ## 📋 Requisitos
 
@@ -16,15 +17,6 @@ Sistema de gestión de leads para FanFan.
 - PostgreSQL (opcional para desarrollo local, requerido en producción)
 
 ## 🛠️ Instalación
-
-### Backend (API)
-
-```bash
-cd api
-npm install
-```
-
-### Frontend (Web)
 
 ```bash
 cd web
@@ -35,7 +27,7 @@ npm install
 
 ### Variables de Entorno
 
-Crea un archivo `.env` en la carpeta `api/` basándote en `.env.example`:
+Crea un archivo `.env.local` en la carpeta `web/`:
 
 ```env
 # PostgreSQL (Railways lo proporciona automáticamente)
@@ -47,34 +39,19 @@ ADMIN_PASSWORD=tu_password_seguro
 
 # JWT Secret
 JWT_SECRET=tu_secret_jwt_seguro
-
-# Puerto
-PORT=8080
-```
-
-### Frontend
-
-Crea un archivo `.env.local` en la carpeta `web/`:
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:4000
 ```
 
 ## 🏃 Desarrollo
-
-### Backend
-
-```bash
-cd api
-npm run dev        # http://localhost:4000
-```
-
-### Frontend
 
 ```bash
 cd web
 npm run dev        # http://localhost:3000
 ```
+
+La API está disponible en:
+- `POST /api/auth/login` - Login admin
+- `POST /api/fanfan/leads` - Crear lead (público)
+- `GET /api/fanfan/leads` - Obtener leads (requiere autenticación)
 
 ## 📦 Producción (Railways)
 
@@ -95,6 +72,11 @@ Configura estas variables en Railways:
 - `JWT_SECRET` (genera uno seguro)
 - `PORT` (Railways lo configura automáticamente)
 
+### Comandos de Build y Start en Railways
+
+- **Build Command**: `cd web && npm install && npm run build`
+- **Start Command**: `cd web && npm start`
+
 ## 🔐 Acceso Admin
 
 1. Ve a `/admin/login`
@@ -103,31 +85,89 @@ Configura estas variables en Railways:
 
 ## 📡 Endpoints API
 
-### Públicos
+### POST /api/auth/login
+Login de administrador.
 
-- `POST /fanfan/leads` - Crear un nuevo lead (sin autenticación)
+**Body:**
+```json
+{
+  "email": "admin",
+  "password": "tu_password"
+}
+```
 
-### Protegidos (requieren token admin)
+**Response:**
+```json
+{
+  "token": "jwt_token",
+  "user": {
+    "username": "admin",
+    "email": "admin",
+    "role": "admin"
+  }
+}
+```
 
-- `GET /fanfan/leads` - Obtener todos los leads
-- `POST /auth/login` - Login admin
+### POST /api/fanfan/leads
+Crear un nuevo lead (público, no requiere autenticación).
 
-## 🗄️ Base de Datos
+**Body:**
+```json
+{
+  "nombre": "Juan Pérez",
+  "email": "juan@example.com",
+  "telefono": "123456789",
+  "mensaje": "Mensaje opcional",
+  "tipo": "membresia",
+  "codigo": "CODIGO123",
+  "descuento": "10"
+}
+```
 
-La tabla `leads` se crea automáticamente con las siguientes columnas:
+### GET /api/fanfan/leads
+Obtener todos los leads (requiere autenticación admin).
 
-- `id` (VARCHAR) - ID único del lead
-- `nombre` (VARCHAR) - Nombre del contacto
-- `email` (VARCHAR) - Email del contacto
-- `telefono` (VARCHAR) - Teléfono (opcional)
-- `mensaje` (TEXT) - Mensaje/solicitud
-- `tipo` (VARCHAR) - Tipo de solicitud
-- `codigo` (VARCHAR) - Código de descuento (opcional)
-- `descuento` (VARCHAR) - Descuento aplicado (opcional)
-- `fecha` (TIMESTAMP) - Fecha de creación
+**Headers:**
+```
+Authorization: Bearer <token>
+```
 
-## 📝 Notas
+**Response:**
+```json
+{
+  "success": true,
+  "leads": [...],
+  "total": 10
+}
+```
 
-- Si no hay `DATABASE_URL` configurada, el sistema usa almacenamiento en memoria (solo desarrollo)
-- Los leads se guardan automáticamente en PostgreSQL cuando está disponible
-- El panel admin requiere autenticación con JWT
+## 🏗️ Estructura del Proyecto
+
+```
+web/
+├── src/
+│   ├── app/
+│   │   ├── api/              # Next.js API Routes
+│   │   │   ├── auth/
+│   │   │   │   └── login/
+│   │   │   │       └── route.ts
+│   │   │   └── fanfan/
+│   │   │       └── leads/
+│   │   │           └── route.ts
+│   │   ├── admin/            # Páginas admin
+│   │   └── ...               # Otras páginas
+│   └── lib/
+│       ├── db.ts             # Conexión PostgreSQL
+│       ├── auth.ts           # JWT y autenticación
+│       ├── validators.ts     # Validación con Zod
+│       └── api.ts            # Cliente API
+└── package.json
+```
+
+## ✅ Ventajas de esta arquitectura
+
+- ✅ **Un solo proyecto** - Todo en la carpeta `web`
+- ✅ **Un solo package.json** - Sin problemas de múltiples lockfiles
+- ✅ **Next.js maneja todo** - Sin servidor custom necesario
+- ✅ **Despliegue simple** - Railway solo necesita ejecutar Next.js
+- ✅ **API integrada** - Las rutas API están en el mismo proyecto

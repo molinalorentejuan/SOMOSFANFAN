@@ -1,5 +1,5 @@
 import { Pool } from 'pg';
-import { db } from '../data';
+import { db } from './data';
 
 const DATABASE_URL = process.env.DATABASE_URL;
 

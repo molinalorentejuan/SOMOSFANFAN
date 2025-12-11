@@ -80,7 +80,7 @@ const FanFanSystem = () => {
     };
     try {
       // Guardar en el backend
-      await api('/fanfan/leads', {
+      await api('/api/fanfan/leads', {
         method: 'POST',
         body: JSON.stringify(data),
       });

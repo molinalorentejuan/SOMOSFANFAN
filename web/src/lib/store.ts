@@ -20,7 +20,7 @@ export const useAuth = create<AuthState>()(
                 const { token, user } = await api<{ 
                     token: string; 
                     user: { username: string; email: string; role: string } 
-                }>('/auth/login', {
+                }>('/api/auth/login', {
                     method: 'POST',
                     body: JSON.stringify({ email, password }),
                 });
