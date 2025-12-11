@@ -57,10 +57,16 @@ export async function api<T>(path: string, opts: RequestInit = {}): Promise<T> {
     } catch (error: any) {
         // Manejo seguro de errores para evitar problemas con filter
         if (error instanceof Error) {
-            throw error;
+            // Asegurar que el error tenga todas las propiedades necesarias
+            const err = error as any;
+            if (!err.status && error.message.includes('401')) {
+                err.status = 401;
+            }
+            throw err;
         }
         // Si el error no es una instancia de Error, crear uno nuevo
-        const err = new Error(error?.message || 'Error desconocido') as any;
+        const errorMessage = error?.message || String(error) || 'Error desconocido';
+        const err = new Error(errorMessage) as any;
         if (error?.status) err.status = error.status;
         if (error?.payload) err.payload = error.payload;
         throw err;

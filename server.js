@@ -12,20 +12,27 @@ const __dirname = dirname(__filename);
 const port = process.env.PORT || 8080;
 const dev = process.env.NODE_ENV !== "production";
 
-const nextApp = next({ dev, dir: path.join(__dirname, "web") });
-const handle = nextApp.getRequestHandler();
-
-// Manejar promesas rechazadas no capturadas ANTES de iniciar
+// Manejar promesas rechazadas no capturadas ANTES de cualquier otra cosa
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('⚠️ Unhandled Rejection at:', promise);
-  console.error('Reason:', reason);
-  // No hacer exit(1) aquí para que Railway pueda manejar el error
+  // Convertir reason a string seguro para evitar problemas con filter
+  const reasonStr = reason instanceof Error ? reason.message : String(reason || 'Unknown error');
+  console.error('⚠️ Unhandled Rejection:', reasonStr);
+  // Log el stack trace si es un Error
+  if (reason instanceof Error && reason.stack) {
+    console.error('Stack:', reason.stack);
+  }
 });
 
 process.on('uncaughtException', (error) => {
-  console.error('❌ Uncaught Exception:', error);
+  console.error('❌ Uncaught Exception:', error.message);
+  if (error.stack) {
+    console.error('Stack:', error.stack);
+  }
   process.exit(1);
 });
+
+const nextApp = next({ dev, dir: path.join(__dirname, "web") });
+const handle = nextApp.getRequestHandler();
 
 nextApp.prepare().then(() => {
   const server = express();
@@ -45,6 +52,11 @@ nextApp.prepare().then(() => {
     console.log(`✅ Ready on port ${port}`);
   });
 }).catch((error) => {
-  console.error('❌ Error iniciando Next.js:', error);
+  // Manejo seguro del error para evitar problemas con filter
+  const errorMessage = error instanceof Error ? error.message : String(error || 'Unknown error');
+  console.error('❌ Error iniciando Next.js:', errorMessage);
+  if (error instanceof Error && error.stack) {
+    console.error('Stack:', error.stack);
+  }
   process.exit(1);
 });
