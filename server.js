@@ -12,12 +12,10 @@ const __dirname = dirname(__filename);
 const port = process.env.PORT || 8080;
 const dev = process.env.NODE_ENV !== "production";
 
-// Manejar promesas rechazadas no capturadas ANTES de cualquier otra cosa
+// Manejar errores ANTES de cualquier cosa
 process.on('unhandledRejection', (reason, promise) => {
-  // Convertir reason a string seguro para evitar problemas con filter
-  const reasonStr = reason instanceof Error ? reason.message : String(reason || 'Unknown error');
+  const reasonStr = reason instanceof Error ? reason.message : String(reason || 'Unknown');
   console.error('⚠️ Unhandled Rejection:', reasonStr);
-  // Log el stack trace si es un Error
   if (reason instanceof Error && reason.stack) {
     console.error('Stack:', reason.stack);
   }
@@ -25,38 +23,30 @@ process.on('unhandledRejection', (reason, promise) => {
 
 process.on('uncaughtException', (error) => {
   console.error('❌ Uncaught Exception:', error.message);
-  if (error.stack) {
-    console.error('Stack:', error.stack);
-  }
+  if (error.stack) console.error('Stack:', error.stack);
   process.exit(1);
 });
 
-const nextApp = next({ dev, dir: path.join(__dirname, "web") });
+const webDir = path.resolve(__dirname, "web");
+const nextApp = next({ dev, dir: webDir });
 const handle = nextApp.getRequestHandler();
 
-nextApp.prepare().then(() => {
-  const server = express();
+nextApp.prepare()
+  .then(() => {
+    const server = express();
+    const { createApp } = require("./api/dist/app.js");
+    
+    if (typeof createApp !== "function") {
+      console.error("❌ createApp no es función");
+      process.exit(1);
+    }
 
-  // Importar createApp después de que Next.js esté listo
-  const { createApp } = require("./api/dist/app.js");
-
-  if (typeof createApp !== "function") {
-    console.error("❌ createApp no es una función. Valor:", createApp);
+    server.use("/api", createApp());
+    server.all("*", (req, res) => handle(req, res));
+    server.listen(port, () => console.log(`✅ Ready on port ${port}`));
+  })
+  .catch((error) => {
+    console.error('❌ Error:', error instanceof Error ? error.message : String(error));
+    if (error instanceof Error && error.stack) console.error('Stack:', error.stack);
     process.exit(1);
-  }
-
-  server.use("/api", createApp());
-  server.all("*", (req, res) => handle(req, res));
-
-  server.listen(port, () => {
-    console.log(`✅ Ready on port ${port}`);
   });
-}).catch((error) => {
-  // Manejo seguro del error para evitar problemas con filter
-  const errorMessage = error instanceof Error ? error.message : String(error || 'Unknown error');
-  console.error('❌ Error iniciando Next.js:', errorMessage);
-  if (error instanceof Error && error.stack) {
-    console.error('Stack:', error.stack);
-  }
-  process.exit(1);
-});
