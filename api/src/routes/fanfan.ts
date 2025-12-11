@@ -62,22 +62,22 @@ fanfanRouter.post('/fanfan/leads', validate(leadSchema),
 fanfanRouter.get('/fanfan/leads', authMiddleware,
     async (_req: Request, res: Response, next: NextFunction) => {
         try {
-            let leads;
+            let leads: any[] = [];
 
             if (pool) {
                 // Desde PostgreSQL
                 const result = await pool.query(
                     'SELECT * FROM leads ORDER BY fecha DESC'
                 );
-                leads = result.rows;
+                leads = Array.isArray(result.rows) ? result.rows : [];
             } else {
                 // Fallback: memoria
-                leads = db.leads;
+                leads = Array.isArray(db.leads) ? db.leads : [];
             }
 
             res.json({ 
                 success: true,
-                leads,
+                leads: leads,
                 total: leads.length 
             });
         } catch (e: any) {

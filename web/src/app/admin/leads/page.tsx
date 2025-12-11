@@ -38,7 +38,8 @@ export default function LeadsAdminPage() {
         try {
             setLoading(true);
             const data = await api<{ leads: Lead[]; total: number }>('/fanfan/leads');
-            setLeads(data.leads || []);
+            // Asegurar que leads sea un array
+            setLeads(Array.isArray(data?.leads) ? data.leads : []);
         } catch (err: any) {
             setError(err.message || 'Error cargando leads');
             if (err.status === 401) {
